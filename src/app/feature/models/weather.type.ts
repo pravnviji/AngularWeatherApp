@@ -5,6 +5,7 @@ export type TMain = {
 }
 
 export type TLocation = {
+  id: string;
   weather: TWeather;
   main: TMain;
   name: string;
