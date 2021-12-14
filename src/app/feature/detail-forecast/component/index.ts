@@ -1,0 +1,1 @@
+export * from './detail-location/detail-location.component';

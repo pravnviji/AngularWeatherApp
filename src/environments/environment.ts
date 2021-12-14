@@ -5,6 +5,7 @@
 export const environment = {
   production: false,
   serverUrl: 'http://localhost:3000/',
+  herokuLocationApiUrl: 'https://lp-store.herokuapp.com/weather?zipcode=',
   openWeatherApiUrl: 'https://api.openweathermap.org/data/2.5/',
   openWeatherId: '5a4b2d457ecbef9eb2a71e480b947604',
 };

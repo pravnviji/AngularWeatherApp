@@ -14,6 +14,6 @@ export type IForecast = {
 
 }
 
-export type TWeather = [{
+export type TWeather = {
   main: string;
-}];
+};
