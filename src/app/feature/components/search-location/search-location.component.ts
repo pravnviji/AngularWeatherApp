@@ -1,4 +1,5 @@
 import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
+import { Router } from "@angular/router";
 import { debounceTime } from "rxjs";
 import { LocalStorageService } from "src/app/core/local.storage.service";
 import { Logger } from "src/app/core/logger.service";
@@ -21,6 +22,7 @@ export class SearchLocationComponent implements OnInit {
   weatherData: Array<TLocation> | undefined;
 
   constructor(
+    private router: Router,
     private logger: Logger,
     private weatherService: WeatherService,
     private localStorage: LocalStorageService
@@ -122,7 +124,7 @@ export class SearchLocationComponent implements OnInit {
 
   goToForecast = (weather: any) => {
     this.localStorage.set(FeatureConstants.LOCATION, weather.name);
-    return `forecast/${weather?.zipcode}`;
+    this.router.navigate([`forecast/${weather?.zipcode}`]);
   };
 
   removeWeather = (id: string) => {

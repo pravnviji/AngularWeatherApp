@@ -17,7 +17,7 @@
         <h4>Temperatures today:</h4>
         <p>Current {{weather.main.temp}} - Max {{weather.main.temp_min}} - Min {{weather.main.temp_max}}</p>
         <p>
-          <a [href]="goToForecast(weather)">Show 5-day forecast for Rancho Cordova</a>
+          <button class="ng-search-location__btn" (click)="goToForecast(weather)">Show 5-day forecast for Rancho Cordova</button>
         </p>
       </div>
       <div>
