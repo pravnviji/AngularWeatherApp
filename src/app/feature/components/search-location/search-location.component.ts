@@ -1,4 +1,5 @@
 import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
+import { debounceTime } from "rxjs";
 import { LocalStorageService } from "src/app/core/local.storage.service";
 import { Logger } from "src/app/core/logger.service";
 import { TLocation } from "../../models/weather.type";
@@ -13,6 +14,8 @@ import { FeatureConstants } from "../../utils";
 export class SearchLocationComponent implements OnInit {
   @ViewChild("addLocation", { static: true })
   addLocation!: ElementRef;
+  @ViewChild("btnSubmit", { static: true })
+  btnSubmit!: ElementRef;
   zipCodes: Array<string> | undefined;
   isCurrentWeatherEnable: boolean | false | undefined;
   weatherData: Array<TLocation> | undefined;
@@ -31,26 +34,25 @@ export class SearchLocationComponent implements OnInit {
     const getWeatherData = this.localStorage.get(
       FeatureConstants.ZIP_WEATHER_DATA
     );
-    this.setUpdateWeatherData(getWeatherData);
+    this.updateWeather(getWeatherData);
   }
 
   storeWeatherLocation = () => {
     this.logger.debug(":: storeWeatherLocation ::");
+    this.btnSubmit.nativeElement.disabled = true;
     const zipCode: string = this.addLocation.nativeElement.value;
     this.logger.debug(":: Zipcode ::", zipCode);
     if (!this.checkZipValid(zipCode)) {
       alert("Please enter the valid zipcode");
       return;
     }
-    this.weatherService.getWeatherData(zipCode).subscribe((data) => {
-      //  this.addNewZipCodes(zipCode);
-      this.currentWeatherCondition(data);
-      this.clearZipCode();
-    });
-  };
-
-  addNewZipCodes = (zipCode: string) => {
-    this.addDataToStorage(zipCode, FeatureConstants.ZIP_CODES);
+    this.weatherService
+      .getWeatherData(zipCode)
+      .pipe(debounceTime(500))
+      .subscribe((data) => {
+        this.currentWeather(data);
+        this.clearZipCode();
+      });
   };
 
   checkZipValid = (zipCode: string): boolean => {
@@ -60,9 +62,10 @@ export class SearchLocationComponent implements OnInit {
 
   clearZipCode = () => {
     this.addLocation.nativeElement.value = "";
+    this.btnSubmit.nativeElement.disabled = false;
   };
 
-  currentWeatherCondition = (data: TLocation) => {
+  currentWeather = (data: TLocation) => {
     this.logger.debug(":: currentWeatherCondition ::");
     this.logger.debug("", data);
     this.addNewWeatherData(data);
@@ -74,10 +77,10 @@ export class SearchLocationComponent implements OnInit {
       FeatureConstants.ZIP_WEATHER_DATA
     );
 
-    this.setUpdateWeatherData(getUpdatedData);
+    this.updateWeather(getUpdatedData);
   };
 
-  setUpdateWeatherData = (data?: Array<TLocation>) => {
+  updateWeather = (data?: Array<TLocation>) => {
     this.logger.debug("setUpdateWeatherData");
 
     this.isCurrentWeatherEnable =
@@ -95,22 +98,41 @@ export class SearchLocationComponent implements OnInit {
   }
 
   addDataToStorage = (data: TLocation | string, FeatureConst: string) => {
-    const exisitingData: Array<TLocation> = this.localStorage.get(FeatureConst);
+    const exisitingData = this.localStorage.get(FeatureConst);
     const addZipCode = {
       ...(data as TLocation),
       zipcode: this.addLocation.nativeElement.value,
     };
     if (exisitingData && exisitingData.length > 0) {
-      const newData = [...new Set([...exisitingData, addZipCode])];
-      this.logger.debug(`Checking ${FeatureConst} data`, newData);
-      this.localStorage.set(FeatureConst, newData);
+      const checkZipExist = exisitingData.find(
+        (item: any) => item.zipcode === this.addLocation.nativeElement.value
+      );
+      this.logger.debug(`checkZipExist`, checkZipExist);
+      if (!checkZipExist) {
+        const newData = [...exisitingData, addZipCode];
+        this.logger.debug(`Checking ${FeatureConst} data`, newData);
+        this.localStorage.set(FeatureConst, newData);
+      } else {
+        alert("Zipcode is already Added");
+      }
     } else {
       this.localStorage.set(FeatureConst, [addZipCode]);
     }
   };
 
   goToForecast = (weather: any) => {
-    console.log("GotoForecast");
     return `forecast/${weather?.zipcode}`;
+  };
+
+  removeWeather = (id: string) => {
+    this.logger.debug("removeWeatherData", id);
+    const exisitingData: Array<TLocation> = this.localStorage.get(
+      FeatureConstants.ZIP_WEATHER_DATA
+    );
+    const newDataArray: Array<TLocation> = exisitingData.filter(
+      (item) => item.id !== id
+    ) as Array<TLocation>;
+    this.localStorage.set(FeatureConstants.ZIP_WEATHER_DATA, newDataArray);
+    this.weatherData = newDataArray;
   };
 }
