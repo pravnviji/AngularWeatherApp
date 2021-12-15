@@ -121,6 +121,7 @@ export class SearchLocationComponent implements OnInit {
   };
 
   goToForecast = (weather: any) => {
+    this.localStorage.set(FeatureConstants.LOCATION, weather.name);
     return `forecast/${weather?.zipcode}`;
   };
 

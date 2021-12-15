@@ -1,6 +1,5 @@
 export class FeatureConstants {
-  public static readonly ZIP_CODES = "zipCodes";
-  public static readonly WEATHER_DATA = "weatherData";
+  public static readonly LOCATION = "location";
   public static readonly ZIP_WEATHER_DATA = "zipWeatherData";
 
   public static readonly WEATHER_IMAGE = [

@@ -11,8 +11,13 @@ export type TLocation = {
   name: string;
 };
 
-export type IForecast = {};
-
 export type TWeather = {
   main: string;
+};
+
+export type TWeatherMain = TWeather & TMain;
+
+export type IForecast = {
+  dateTime: string;
+  weather: TWeatherMain;
 };
