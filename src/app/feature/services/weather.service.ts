@@ -26,6 +26,7 @@ export class WeatherService {
 
   getWeatherData = (location: string): Observable<TLocation> => {
     this.logger.debug("-------- getWeatherData ----------");
+    this.logger.debug("url", environment.herokuLocationApiUrl + location);
     return this.http.get(environment.herokuLocationApiUrl + location).pipe(
       retry(3),
       map((result) => this.mapGetWeatherData(result as TLocation))

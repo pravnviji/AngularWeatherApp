@@ -1,13 +1,15 @@
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { BehaviorSubject, Observable } from "rxjs";
+import { BehaviorSubject, Observable, Subscription } from "rxjs";
 import { Logger } from "src/app/core/logger.service";
 import { Location } from "@angular/common";
 import { IForecast } from "src/app/feature/models/weather.type";
-import { WeatherService } from "src/app/feature/services/weather.service";
+import { WeatherService } from "src/app/feature/services";
 import { LocalStorageService } from "src/app/core/local.storage.service";
 import { FeatureConstants } from "src/app/feature/utils";
+import { UntilDestroy } from "@ngneat/until-destroy";
 
+@UntilDestroy({ checkProperties: true })
 @Component({
   selector: "ng-detail-location",
   templateUrl: "./detail-location.component.html",
@@ -22,6 +24,8 @@ export class DetailLocationComponent implements OnInit {
   >([]);
   weatherData$: Observable<IForecast[]> | undefined =
     this.weatherSubject.asObservable();
+
+  private sub: Subscription | undefined;
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -40,7 +44,7 @@ export class DetailLocationComponent implements OnInit {
       "zipcode"
     ) as string;
 
-    this.weatherService
+    this.sub = this.weatherService
       .getForecast(this.zipCode)
       .subscribe((res) => this.weatherSubject.next(res));
     this.logger.debug(`zipCode`, this.zipCode);

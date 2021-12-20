@@ -1,12 +1,14 @@
 import { Component, ElementRef, OnInit, ViewChild } from "@angular/core";
 import { Router } from "@angular/router";
-import { debounceTime } from "rxjs";
+import { debounceTime, Subscription } from "rxjs";
 import { LocalStorageService } from "src/app/core/local.storage.service";
 import { Logger } from "src/app/core/logger.service";
+import { UntilDestroy } from "@ngneat/until-destroy";
 import { TLocation } from "../../models/weather.type";
-import { WeatherService } from "../../services/weather.service";
+import { WeatherService } from "../../services";
 import { FeatureConstants } from "../../utils";
 
+@UntilDestroy({ checkProperties: true })
 @Component({
   selector: "ng-search-location",
   templateUrl: "./search-location.component.html",
@@ -16,10 +18,11 @@ export class SearchLocationComponent implements OnInit {
   @ViewChild("addLocation", { static: true })
   addLocation!: ElementRef;
   @ViewChild("btnSubmit", { static: true })
-  btnSubmit!: ElementRef;
-  zipCodes: Array<string> | undefined;
-  isCurrentWeatherEnable: boolean | false | undefined;
-  weatherData: Array<TLocation> | undefined;
+  private btnSubmit!: ElementRef;
+  private sub: Subscription | undefined;
+
+  public isCurrentWeatherEnable: boolean | false | undefined;
+  public weatherData: Array<TLocation> | undefined;
 
   constructor(
     private router: Router,
@@ -48,7 +51,7 @@ export class SearchLocationComponent implements OnInit {
       alert("Please enter the valid zipcode");
       return;
     }
-    this.weatherService
+    this.sub = this.weatherService
       .getWeatherData(zipCode)
       .pipe(debounceTime(500))
       .subscribe((data) => {
