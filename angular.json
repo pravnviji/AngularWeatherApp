@@ -52,6 +52,7 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
+            "port": 9000,
             "browserTarget": "demo:build"
           },
           "configurations": {

@@ -17,7 +17,7 @@ export type TWeather = {
 
 export type TWeatherMain = TWeather & TMain;
 
-export type IForecast = {
+export type TForecast = {
   dateTime: string;
   weather: TWeatherMain;
 };

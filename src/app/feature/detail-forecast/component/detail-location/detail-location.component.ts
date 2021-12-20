@@ -3,7 +3,7 @@ import { ActivatedRoute } from "@angular/router";
 import { BehaviorSubject, Observable, Subscription } from "rxjs";
 import { Logger } from "src/app/core/logger.service";
 import { Location } from "@angular/common";
-import { IForecast } from "src/app/feature/models/weather.type";
+import { TForecast } from "src/app/feature/models/weather.type";
 import { WeatherService } from "src/app/feature/services";
 import { LocalStorageService } from "src/app/core/local.storage.service";
 import { FeatureConstants } from "src/app/feature/utils";
@@ -19,10 +19,10 @@ export class DetailLocationComponent implements OnInit {
   zipCode!: string;
   locationName!: string;
 
-  private weatherSubject: BehaviorSubject<IForecast[]> = new BehaviorSubject<
-    IForecast[]
+  private weatherSubject: BehaviorSubject<TForecast[]> = new BehaviorSubject<
+    TForecast[]
   >([]);
-  weatherData$: Observable<IForecast[]> | undefined =
+  weatherData$: Observable<TForecast[]> | undefined =
     this.weatherSubject.asObservable();
 
   private sub: Subscription | undefined;

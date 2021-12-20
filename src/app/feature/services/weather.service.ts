@@ -1,10 +1,10 @@
 import { Injectable } from "@angular/core";
-import { BehaviorSubject, map, Observable, pluck, retry } from "rxjs";
+import { map, Observable, pluck, retry } from "rxjs";
 import { HttpRequestService } from "src/app/core/http/http-request.service";
 import { Logger } from "src/app/core/logger.service";
 import { environment } from "src/environments/environment";
 import {
-  IForecast,
+  TForecast,
   TLocation,
   TMain,
   TWeather,
@@ -18,11 +18,6 @@ import { FeatureConstants } from "../utils";
 })
 export class WeatherService {
   constructor(private http: HttpRequestService, private logger: Logger) {}
-
-  public locationSubject: BehaviorSubject<TLocation> =
-    new BehaviorSubject<TLocation>({} as TLocation);
-  public locationData$: Observable<TLocation> | undefined =
-    this.locationSubject.asObservable();
 
   getWeatherData = (location: string): Observable<TLocation> => {
     this.logger.debug("-------- getWeatherData ----------");
@@ -81,7 +76,7 @@ export class WeatherService {
     );
   };
 
-  mapForeCast = (result: any): IForecast[] => {
+  mapForeCast = (result: any): TForecast[] => {
     this.logger.debug("---------------------------------------");
     this.logger.debug(":: mapForeCast ::");
     this.logger.debug("Actual Response", result);
@@ -90,7 +85,7 @@ export class WeatherService {
         result.map((r: { dt_txt: string }) => r.dt_txt.substring(0, 10))
       ),
     ].splice(0);
-    let formatForeCastResponse: Array<IForecast> = [];
+    let formatForeCastResponse: Array<TForecast> = [];
     for (let record of next5DaysTimeStamp) {
       const eachDayData = result.find(
         (d: { dt_txt: string }) => d.dt_txt.substring(0, 10) === record
