@@ -1,5 +1,15 @@
 import { Injectable } from "@angular/core";
-import { map, Observable, pluck, retry } from "rxjs";
+import {
+  BehaviorSubject,
+  catchError,
+  map,
+  Observable,
+  of,
+  pluck,
+  retry,
+} from "rxjs";
+
+import { untilDestroyed } from "@ngneat/until-destroy";
 import { HttpRequestService } from "src/app/core/http/http-request.service";
 import { Logger } from "src/app/core/logger.service";
 import { environment } from "src/environments/environment";
@@ -18,6 +28,12 @@ import { FeatureConstants } from "../utils";
 })
 export class WeatherService {
   constructor(private http: HttpRequestService, private logger: Logger) {}
+
+  public forecastSubject: BehaviorSubject<TForecast[]> = new BehaviorSubject<
+    TForecast[]
+  >([]);
+  public forecastData$: Observable<TForecast[]> | undefined =
+    this.forecastSubject.asObservable();
 
   getWeatherData = (location: string): Observable<TLocation> => {
     this.logger.debug("-------- getWeatherData ----------");
@@ -66,20 +82,32 @@ export class WeatherService {
     return tWeatherData;
   };
 
-  getForecast = (zipCode: string): Observable<any> => {
+  getForecast = (zipCode: string) => {
+    this.logger.debug(":: getForecast ::");
     const forecastUrl = `${environment.openWeatherApiUrl}forecast?zip=${zipCode},us&appid=${environment.openWeatherId}`;
 
-    return this.http.get(forecastUrl).pipe(
-      retry(3),
-      pluck("list"),
-      map((result) => this.mapForeCast(result))
-    );
+    this.http
+      .get(forecastUrl)
+      .pipe(
+        retry(1),
+        pluck("list"),
+        untilDestroyed(this),
+        catchError(this.getForecastError),
+        map((result) => this.mapForeCast(result))
+      )
+      .subscribe();
   };
 
-  mapForeCast = (result: any): TForecast[] => {
+  getForecastError = () => of(0);
+
+  mapForeCast = (result: any) => {
     this.logger.debug("---------------------------------------");
     this.logger.debug(":: mapForeCast ::");
     this.logger.debug("Actual Response", result);
+    if (result == 0) {
+      this.forecastSubject.next([]);
+      return;
+    }
     const next5DaysTimeStamp = [
       ...new Set(
         result.map((r: { dt_txt: string }) => r.dt_txt.substring(0, 10))
@@ -97,7 +125,7 @@ export class WeatherService {
     }
     this.logger.debug("Formatted Response", formatForeCastResponse);
     this.logger.debug("---------------------------------------");
-    return formatForeCastResponse;
+    this.forecastSubject.next(formatForeCastResponse);
   };
 
   filterForecast = (

@@ -44,13 +44,13 @@ export class SearchLocationComponent implements OnInit {
 
   storeWeatherLocation = () => {
     this.logger.debug(":: storeWeatherLocation ::");
-    this.btnSubmit.nativeElement.disabled = true;
     const zipCode: string = this.addLocation.nativeElement.value;
     this.logger.debug(":: Zipcode ::", zipCode);
-    if (!this.checkZipValid(zipCode)) {
-      alert("Please enter the valid zipcode");
+    if (this.checkDataToStorage() || !this.checkZipValid(zipCode)) {
+      alert("Please enter the valid zipcode or already exist");
       return;
     }
+    this.btnSubmit.nativeElement.disabled = true;
     this.sub = this.weatherService
       .getWeatherData(zipCode)
       .pipe(debounceTime(500))
@@ -101,6 +101,22 @@ export class SearchLocationComponent implements OnInit {
   identify(index: any, item: TLocation) {
     return item.id;
   }
+
+  checkDataToStorage = (): boolean => {
+    this.logger.debug(`:: checkDataToStorage ::`);
+    const exisitingData = this.localStorage.get(
+      FeatureConstants.ZIP_WEATHER_DATA
+    );
+    let checkZipExist = null;
+    if (exisitingData && exisitingData.length > 0) {
+      checkZipExist = exisitingData.find(
+        (item: any) => item.zipcode === this.addLocation.nativeElement.value
+      );
+    }
+    this.logger.debug(``, checkZipExist);
+    this.logger.debug(`check value`, !checkZipExist ? false : true);
+    return !checkZipExist ? false : true;
+  };
 
   addDataToStorage = (data: TLocation | string, FeatureConst: string) => {
     const exisitingData = this.localStorage.get(FeatureConst);

@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
-import { BehaviorSubject, Observable, Subscription } from "rxjs";
+import { Observable, Subscription } from "rxjs";
 import { Logger } from "src/app/core/logger.service";
 import { Location } from "@angular/common";
 import { TForecast } from "src/app/feature/models/weather.type";
@@ -19,11 +19,8 @@ export class DetailLocationComponent implements OnInit {
   zipCode!: string;
   locationName!: string;
 
-  private weatherSubject: BehaviorSubject<TForecast[]> = new BehaviorSubject<
-    TForecast[]
-  >([]);
-  weatherData$: Observable<TForecast[]> | undefined =
-    this.weatherSubject.asObservable();
+  public weatherData$: Observable<TForecast[]> | undefined =
+    this.weatherService.forecastData$;
 
   private sub: Subscription | undefined;
 
@@ -43,10 +40,8 @@ export class DetailLocationComponent implements OnInit {
     this.zipCode = this.activatedRoute.snapshot.paramMap.get(
       "zipcode"
     ) as string;
+    this.weatherService.getForecast(this.zipCode);
 
-    this.sub = this.weatherService
-      .getForecast(this.zipCode)
-      .subscribe((res) => this.weatherSubject.next(res));
     this.logger.debug(`zipCode`, this.zipCode);
     this.locationName = this.localStorage.get(FeatureConstants.LOCATION);
   }

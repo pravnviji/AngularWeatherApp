@@ -1,25 +1,47 @@
+<h4>Template for 5-day forecast page: {{ this.locationName }}</h4>
 
-<h4>Template for 5-day forecast page: {{this.locationName}}</h4>
-
-<ng-container *ngIf="weatherData$ | async as weather">
-<div class="container-fluid">
-  <br>
-  <div class="panel panel-default">
-    <div class="panel-heading">
-      <h3 class="panel-title">5-day forecast for {{this.locationName}}</h3>
-
-    </div>
-    <ul class="list-group"  *ngFor="let record of weather ;let index;">
-      <!----><li class="list-group-item">
-        {{record.dateTime | date: "fullDate"}}
-        {{record.weather.main}}
-        - Min: {{record.weather.temp_min}}
-        - Max: {{record.weather.temp_max}}
-
-        <img class="icon" [src]="getImageUrl(record.weather.main)">
-      </li>
-    </ul>
-  </div>
-  <button class="btn btn-success" tabindex="0" id="mainPageBtn" (click)="navigateHome()">&lt; Back to main page</button>
-</div>
+<ng-container
+  *ngIf="weatherData$ | async as weather"
+  [ngTemplateOutlet]="
+    weather.length !== 0 ? weatherTemplate : noWeatherTemplate
+  "
+  [ngTemplateOutletContext]="{ weatherData: weather }"
+>
 </ng-container>
+
+<ng-template #weatherTemplate let-weather="weatherData">
+  <div class="container-fluid">
+    <br />
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">5-day forecast for {{ this.locationName }}</h3>
+      </div>
+
+      <ul class="list-group" *ngFor="let record of weather; let index">
+        <!---->
+        <li class="list-group-item">
+          {{ record.dateTime | date: "fullDate" }}
+          {{ record.weather.main }}
+          - Min: {{ record.weather.temp_min }} - Max:
+          {{ record.weather.temp_max }}
+
+          <img class="icon" [src]="getImageUrl(record.weather.main)" />
+        </li>
+      </ul>
+    </div>
+    <button
+      class="btn btn-success"
+      tabindex="0"
+      id="mainPageBtn"
+      (click)="navigateHome()"
+    >
+      &lt; Back to main page
+    </button>
+  </div>
+</ng-template>
+
+<ng-template #noWeatherTemplate>
+  <div class="text-center lead bg-warning text-warning">
+    No Data Available for this Location
+  </div>
+</ng-template>

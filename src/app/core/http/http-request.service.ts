@@ -10,9 +10,7 @@ import { Logger } from "../../core/logger.service";
 export class HttpRequestService {
   private header: HttpHeaders = new HttpHeaders({ responseType: "JSON" });
 
-  constructor(private http: HttpClient, private logger: Logger) {
-    this.logger.debug(`HttpRequestService`, environment.serverUrl);
-  }
+  constructor(private http: HttpClient, private logger: Logger) {}
 
   /**
    * Gets http request service
@@ -50,7 +48,7 @@ export class HttpRequestService {
   public post(path: string, body: object, header?: object): Observable<Object> {
     this.logger.debug(`HttpRequestService`, `post`);
     this.logger.debug(`HttpRequestService`, body);
-    this.logger.debug(`HttpRequestService`, environment.serverUrl + path);
+    this.logger.debug(`HttpRequestService`, path);
     header = header ?? this.header;
 
     return this.http.post(path, body, header).pipe(
